@@ -43,7 +43,7 @@ objects:
     - name: latest
       from:
         kind: DockerImage
-        name: registry.access.redhat.com/ubi8/nodejs-12
+        name: registry.access.redhat.com/ubi8/nodejs-14:latest
 - apiVersion: build.openshift.io/v1
   kind: BuildConfig
   metadata:
