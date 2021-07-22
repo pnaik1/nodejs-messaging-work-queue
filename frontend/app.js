@@ -22,7 +22,6 @@ const path = require('path');
 const crypto = require('crypto');
 const bodyParser = require('body-parser');
 const express = require('express');
-const probe = require('kube-probe');
 const rhea = require('rhea');
 
 // AMQP
@@ -129,7 +128,14 @@ app.use('/api/greeting', (request, response) => {
   response.send({ content: `Hello, ${name || 'World!'}` });
 });
 
-probe(app);
+// Add basic health check endpoints
+app.use('/ready', (request, response) => {
+  return response.sendStatus(200);
+});
+
+app.use('/live', (request, response) => {
+  return response.sendStatus(200);
+});
 
 app.post('/api/send-request', (req, resp) => {
   const message = {

@@ -22,7 +22,6 @@
 const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
-const probe = require('kube-probe');
 const rhea = require('rhea');
 
 const amqpHost = process.env.MESSAGING_SERVICE_HOST || 'localhost';
@@ -128,6 +127,13 @@ const app = express();
 // Expose the license.html at http[s]://[host]:[port]/licenses/licenses.html
 app.use('/licenses', express.static(path.join(__dirname, 'licenses')));
 
-probe(app);
+// Add basic health check endpoints
+app.use('/ready', (request, response) => {
+  return response.sendStatus(200);
+});
+
+app.use('/live', (request, response) => {
+  return response.sendStatus(200);
+});
 
 module.exports = app;
