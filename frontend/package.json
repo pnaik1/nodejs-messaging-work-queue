@@ -7,7 +7,7 @@
     "pretest": "eslint --ignore-path ../.gitignore .",
     "test": "node -e \"console.log('no tests found.')\"",
     "prepublish": "license-reporter report -s",
-    "openshift": "nodeshift --dockerImage=registry.access.redhat.com/ubi8/nodejs-14:latest",
+    "openshift": "nodeshift --dockerImage=registry.access.redhat.com/ubi8/nodejs-14",
     "postinstall": "license-reporter report -s && license-reporter save -s --xml licenses.xml",
     "start": "node ."
   },
