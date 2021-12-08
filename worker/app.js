@@ -124,9 +124,6 @@ container.connect(opts);
 
 const app = express();
 
-// Expose the license.html at http[s]://[host]:[port]/licenses/licenses.html
-app.use('/licenses', express.static(path.join(__dirname, 'licenses')));
-
 // Add basic health check endpoints
 app.use('/ready', (request, response) => {
   return response.sendStatus(200);
