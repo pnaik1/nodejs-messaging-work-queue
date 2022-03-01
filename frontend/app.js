@@ -74,9 +74,8 @@ container.on('connection_open', event => {
   console.log(
     `${id}: Connected to AMQP messaging service at ${amqpConnectionBindings.host}:${amqpConnectionBindings.port}`
   );
-  requestSender = event.connection.open_sender('work-queue/requests');
-  responseReceiver = event.connection.open_receiver({ source: { dynamic: true } });
-  workerUpdateReceiver = event.connection.open_receiver('work-queue/worker-updates');
+  requestSender = event.connection.open_sender('requests');
+  workerUpdateReceiver = event.connection.open_receiver('worker-updates');
 });
 
 container.on('sendable', () => {
