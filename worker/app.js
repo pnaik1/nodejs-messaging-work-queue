@@ -68,8 +68,8 @@ container.on('connection_open', event => {
     `${id}: Connected to AMQP messaging service at ${amqpConnectionBindings.host}:${amqpConnectionBindings.port}`
   );
 
-  event.connection.open_receiver('work-queue/requests');
-  workerUpdateSender = event.connection.open_sender('work-queue/worker-updates');
+  event.connection.open_receiver('requests');
+  workerUpdateSender = event.connection.open_sender('worker-updates');
 });
 
 container.on('message', event => {
