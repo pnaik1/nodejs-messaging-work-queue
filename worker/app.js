@@ -46,6 +46,7 @@ const container = rhea.create_container({ id });
 let workerUpdateSender = null;
 let requestsProcessed = 0;
 let processingErrors = 0;
+let requestSender = null;
 
 function processRequest (request) {
   const uppercase = request.application_properties.uppercase;
@@ -70,6 +71,7 @@ container.on('connection_open', event => {
 
   event.connection.open_receiver('requests');
   workerUpdateSender = event.connection.open_sender('worker-updates');
+  requestSender = event.connection.open_sender('worker-dynamic');
 });
 
 container.on('message', event => {
@@ -87,7 +89,7 @@ container.on('message', event => {
   }
 
   const response = {
-    to: request.reply_to,
+    reply_to: request.reply_to,
     correlation_id: request.message_id,
     application_properties: {
       workerId: container.id
@@ -95,7 +97,9 @@ container.on('message', event => {
     body: responseBody
   };
 
-  event.connection.send(response);
+  if (requestSender.sendable()) {
+    requestSender.send(response);
+  }
 
   requestsProcessed++;
 
