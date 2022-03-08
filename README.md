@@ -10,7 +10,7 @@ message protocol to send and receive messages.
 
 ## Prerequisites
 
-* Node.js version 10, 12 or 14
+* Node.js version 12, 14 or 16
 
 * The user has access to an OpenShift instance and is logged in.
 
