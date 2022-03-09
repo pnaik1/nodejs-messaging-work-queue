@@ -23,13 +23,23 @@ const crypto = require('crypto');
 const bodyParser = require('body-parser');
 const express = require('express');
 const rhea = require('rhea');
+const serviceBindings = require('kube-service-bindings');
 
 // AMQP
 
-const amqpHost = process.env.MESSAGING_SERVICE_HOST || 'localhost';
-const amqpPort = process.env.MESSAGING_SERVICE_PORT || 5672;
-const amqpUser = process.env.MESSAGING_SERVICE_USER || 'work-queue';
-const amqpPassword = process.env.MESSAGING_SERVICE_PASSWORD || 'work-queue';
+let amqpConnectionBindings;
+
+try {
+  amqpConnectionBindings = serviceBindings.getBinding('AMQP', 'rhea');
+} catch (err) {
+  console.log(err);
+  amqpConnectionBindings = {
+    host: process.env.MESSAGING_SERVICE_HOST || 'localhost',
+    port: process.env.MESSAGING_SERVICE_PORT || 5672,
+    username: process.env.MESSAGING_SERVICE_USER || 'work-queue',
+    password: process.env.MESSAGING_SERVICE_PASSWORD || 'work-queue'
+  };
+}
 
 const id = `frontend-nodejs-${crypto.randomBytes(2).toString('hex')}`;
 const container = rhea.create_container({ id });
@@ -61,11 +71,12 @@ function sendRequests () {
 }
 
 container.on('connection_open', event => {
-  console.log(`${id}: Connected to AMQP messaging service at ${amqpHost}:${amqpPort}`);
-
-  requestSender = event.connection.open_sender('work-queue/requests');
-  responseReceiver = event.connection.open_receiver({ source: { dynamic: true } });
-  workerUpdateReceiver = event.connection.open_receiver('work-queue/worker-updates');
+  console.log(
+    `${id}: Connected to AMQP messaging service at ${amqpConnectionBindings.host}:${amqpConnectionBindings.port}`
+  );
+  requestSender = event.connection.open_sender('requests');
+  responseReceiver = event.connection.open_receiver('worker-dynamic');
+  workerUpdateReceiver = event.connection.open_receiver('worker-updates');
 });
 
 container.on('sendable', () => {
@@ -99,19 +110,14 @@ container.on('message', event => {
   }
 });
 
-const opts = {
-  host: amqpHost,
-  port: amqpPort,
-  username: amqpUser,
-  password: amqpPassword
-};
-
 container.on('error', err => {
   console.log(err);
 });
 
-console.log(`${id}: Attempting to connect to AMQP messaging service at ${amqpHost}:${amqpPort}`);
-container.connect(opts);
+console.log(
+  `${id}: Attempting to connect to AMQP messaging service at ${amqpConnectionBindings.host}:${amqpConnectionBindings.port}`
+);
+container.connect(amqpConnectionBindings);
 
 // HTTP
 

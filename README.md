@@ -10,6 +10,8 @@ message protocol to send and receive messages.
 
 ## Prerequisites
 
+* Node.js version 12, 14 or 16
+
 * The user has access to an OpenShift instance and is logged in.
 
 * The user has selected a project in which the frontend and backend
@@ -22,7 +24,7 @@ Run the following commands to configure and deploy the applications.
 ```bash
 $ oc create -f service.amqp.yaml
 
-$ ./start-openshift
+$ ./start-openshift.sh
 ```
 ## Modules
 

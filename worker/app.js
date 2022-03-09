@@ -23,12 +23,21 @@ const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const rhea = require('rhea');
+const serviceBindings = require('kube-service-bindings');
 
-const amqpHost = process.env.MESSAGING_SERVICE_HOST || 'localhost';
-const amqpPort = process.env.MESSAGING_SERVICE_PORT || 5672;
-const amqpUser = process.env.MESSAGING_SERVICE_USER || 'work-queue';
-const amqpPassword = process.env.MESSAGING_SERVICE_PASSWORD || 'work-queue';
+let amqpConnectionBindings;
 
+try {
+  amqpConnectionBindings = serviceBindings.getBinding('AMQP', 'rhea');
+} catch (err) {
+  console.log(err);
+  amqpConnectionBindings = {
+    host: process.env.MESSAGING_SERVICE_HOST || 'localhost',
+    port: process.env.MESSAGING_SERVICE_PORT || 5672,
+    username: process.env.MESSAGING_SERVICE_USER || 'work-queue',
+    password: process.env.MESSAGING_SERVICE_PASSWORD || 'work-queue'
+  };
+}
 // AMQP
 
 const id = `worker-nodejs-${crypto.randomBytes(2).toString('hex')}`;
@@ -37,6 +46,7 @@ const container = rhea.create_container({ id });
 let workerUpdateSender = null;
 let requestsProcessed = 0;
 let processingErrors = 0;
+let requestSender = null;
 
 function processRequest (request) {
   const uppercase = request.application_properties.uppercase;
@@ -55,10 +65,13 @@ function processRequest (request) {
 }
 
 container.on('connection_open', event => {
-  console.log(`${id}: Connected to AMQP messaging service at ${amqpHost}:${amqpPort}`);
+  console.log(
+    `${id}: Connected to AMQP messaging service at ${amqpConnectionBindings.host}:${amqpConnectionBindings.port}`
+  );
 
-  event.connection.open_receiver('work-queue/requests');
-  workerUpdateSender = event.connection.open_sender('work-queue/worker-updates');
+  event.connection.open_receiver('requests');
+  workerUpdateSender = event.connection.open_sender('worker-updates');
+  requestSender = event.connection.open_sender('worker-dynamic');
 });
 
 container.on('message', event => {
@@ -76,7 +89,7 @@ container.on('message', event => {
   }
 
   const response = {
-    to: request.reply_to,
+    reply_to: request.reply_to,
     correlation_id: request.message_id,
     application_properties: {
       workerId: container.id
@@ -84,7 +97,9 @@ container.on('message', event => {
     body: responseBody
   };
 
-  event.connection.send(response);
+  if (requestSender.sendable()) {
+    requestSender.send(response);
+  }
 
   requestsProcessed++;
 
@@ -110,15 +125,10 @@ function sendUpdate () {
 
 setInterval(sendUpdate, 5 * 1000);
 
-const opts = {
-  host: amqpHost,
-  port: amqpPort,
-  username: amqpUser,
-  password: amqpPassword
-};
-
-console.log(`${id}: Attempting to connect to AMQP messaging service at ${amqpHost}:${amqpPort}`);
-container.connect(opts);
+console.log(
+  `${id}: Attempting to connect to AMQP messaging service at ${amqpConnectionBindings.host}:${amqpConnectionBindings.port}`
+);
+container.connect(amqpConnectionBindings);
 
 // HTTP
 
