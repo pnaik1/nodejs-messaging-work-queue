@@ -6,7 +6,7 @@
   "scripts": {
     "pretest": "eslint --ignore-path ../.gitignore .",
     "test": "node -e \"console.log('no tests found.')\"",
-    "openshift": "nodeshift --dockerImage=registry.access.redhat.com/ubi8/nodejs-14",
+    "openshift": "nodeshift --dockerImage=registry.access.redhat.com/ubi8/nodejs-16",
     "start": "node ."
   },
   "main": "./bin/www",
