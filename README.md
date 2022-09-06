@@ -32,3 +32,10 @@ The `frontend` module serves the web interface and communicates with
 workers in the backend.
 
 The `worker` module implements the worker service in the backend.
+
+### OpenTelemetry with OpenShift Distributed Tracing Platform
+
+Clone this repository, switch the branch to `opentelemetry-js-rhosdt`
+and follow the instructions on README.md
+
+Or visualize the instructions via github https://github.com/nodeshift-starters/nodejs-messaging-work-queue/tree/opentelemetry-js-rhosdt#opentelemetry-with-openshift-distributed-tracing-platform
