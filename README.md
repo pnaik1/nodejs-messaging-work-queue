@@ -1,7 +1,5 @@
 # Messaging Work Queue Example for Node.js
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/nodeshift-starters/nodejs-messaging-work-queue.svg)](https://greenkeeper.io/)
-
 ## Purpose
 
 This example application demonstrates how to dispatch tasks to a scalable
