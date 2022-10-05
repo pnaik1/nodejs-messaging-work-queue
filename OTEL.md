@@ -51,17 +51,14 @@ const exporter = new JaegerExporter({
 
 7. Deploy the example to OpenShift local
 
-* Uncomment the `require('./tracing.js');` on `frontend/app.js`
-* Uncomment the `require('./tracing.js');` on `worker/app.js`
-
 ```
-$ oc create -f service.amqp.yaml
-$ cd frontend
-$ npm install
-$ npm run openshift
-$ cd ../worker
-$ npm install
-$ npm run openshift
+oc create -f service.amqp.yaml
+cd frontend
+npm install
+npm run openshift:enable:trace
+cd ../worker
+npm install
+npm run openshift:enable:trace
 ```
 
 8. When you login on Jaeger UI you can see the result like this:

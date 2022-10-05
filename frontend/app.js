@@ -18,7 +18,7 @@
  *
  */
 
-// require('./tracing.js');
+const logger = require('./logger.js');
 
 const path = require('path');
 const crypto = require('crypto');
@@ -34,7 +34,7 @@ let amqpConnectionBindings;
 try {
   amqpConnectionBindings = serviceBindings.getBinding('AMQP', 'rhea');
 } catch (err) {
-  console.log(err);
+  logger.error(err);
   amqpConnectionBindings = {
     host: process.env.MESSAGING_SERVICE_HOST || 'localhost',
     port: process.env.MESSAGING_SERVICE_PORT || 5672,
@@ -68,12 +68,12 @@ function sendRequests () {
 
     requestSender.send(message);
 
-    console.log(`${id}: Sent request ${JSON.stringify(message)}`);
+    logger.info(`${id}: Sent request ${JSON.stringify(message)}`);
   }
 }
 
 container.on('connection_open', event => {
-  console.log(
+  logger.info(
     `${id}: Connected to AMQP messaging service at ${amqpConnectionBindings.host}:${amqpConnectionBindings.port}`
   );
   requestSender = event.connection.open_sender('requests');
@@ -102,7 +102,7 @@ container.on('message', event => {
   if (event.receiver === responseReceiver) {
     const response = event.message;
 
-    console.log(`${id}: Received response ${response}`);
+    logger.info(`${id}: Received response ${response}`);
 
     responses[response.correlation_id] = {
       requestId: response.correlation_id,
@@ -113,10 +113,10 @@ container.on('message', event => {
 });
 
 container.on('error', err => {
-  console.log(err);
+  logger.info(err);
 });
 
-console.log(
+logger.info(
   `${id}: Attempting to connect to AMQP messaging service at ${amqpConnectionBindings.host}:${amqpConnectionBindings.port}`
 );
 container.connect(amqpConnectionBindings);
